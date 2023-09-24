@@ -1,0 +1,89 @@
+import "hardhat/console.sol";
+pragma solidity >0.8.2;
+
+library StringComparer{
+    function compare(string memory str1, string memory str2) public pure returns (bool) {
+        return keccak256(abi.encodePacked(str1)) == keccak256(abi.encodePacked(str2));
+    }
+}
+
+abstract contract Animal{
+    string name;
+
+    constructor(string memory _name){
+        name = _name;
+    }
+
+    function eat(string calldata _food) virtual view public returns(string memory){
+        return "Animals eats";
+    }
+
+    function sleep() view public returns(string memory){
+        return "Z-z-z-z-z-z-z";
+    }
+
+    function speak() virtual view public returns (string memory){
+        return "Animal speaks";
+    }
+}
+abstract contract Herbivore is Animal{
+
+    string canEat = "plant";
+    function eat(string calldata _food) override virtual view public returns(string memory){
+        require(StringComparer.compare(_food,canEat),"Herbivore cannot eat this");
+        return "Non-nom";
+    }
+
+}
+//модіфікатори тута
+abstract contract Omnivorous is Animal {
+    string canEat1 = "plant";
+    string canEat2 = "meat";
+    string chocolate = "chocolate";
+
+
+    modifier healthyFood(string memory _food) {
+    require((StringComparer.compare(_food, canEat1)||StringComparer.compare(_food, canEat2)||StringComparer.compare(_food, chocolate)), "Predators can eats only MEAT and Plants");
+    require(!StringComparer.compare(_food, chocolate), "Chocolate is bad for ME");
+   _;
+}
+    function eat(string calldata _food) override public view  virtual healthyFood(_food) returns (string memory){
+        return ("Nom-nom");
+
+    }
+
+}
+
+abstract contract Predator is Animal {
+
+    string canEat = "meat";
+    function eat(string calldata _food) override  virtual view public returns(string memory) {
+        require(StringComparer.compare(_food, canEat), "Predators can eats only MEAT");
+    return "NOM-NOM";
+    }
+}
+
+contract Tiger is Predator {
+    constructor(string memory _name) Animal(_name){
+  }
+
+
+
+  function speak() public view override virtual returns (string memory){
+return "RRRRRRR-MEOW";
+  }
+
+}
+
+contract Dog is Omnivorous {
+    constructor(string memory _name) Animal(_name){
+  }
+  function speak() public view override virtual returns (string memory){
+return "Gaff-Gaff";
+  }
+
+
+
+
+}
+
